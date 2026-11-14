@@ -211,7 +211,7 @@ const grain=mesh(BX(1.6,.2,.4),0xe6b84a,FX,.3,FZ);scene.add(grain);
 const cs=spr(g=>{g.fillStyle='#000a';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 40px system-ui';g.textAlign='center';g.fillText('🏠 KÜMES',160,55)},320,80,4.2,1.05);cs.position.set(CX,4.4,RZ0+1.5);scene.add(cs);
 function outRect(b){if(b.y>2)return;const m=.6;if(b.x>RX0-m&&b.x<RX1+m&&b.z>RZ0-m&&b.z<RZ1+m){const d=[b.x-(RX0-m),RX1+m-b.x,b.z-(RZ0-m),RZ1+m-b.z],i=d.indexOf(Math.min(...d));if(i==0)b.x=RX0-m;else if(i==1)b.x=RX1+m;else if(i==2)b.z=RZ0-m;else b.z=RZ1+m}}
 const extra=EX,CN=['Tüy','Kırıntı','Pıt','Çıtır','Cin','Zıpzıp','Mini','Fırfır','Pofuduk','Tombul','Bal','Kiraz','Nane','Limon','Yaprak','Minnoş'];
-let feeder=6,eggs=[],lay=18,msgT=0,cn=0,ckT='';
+let feeder=6,eggs=[],lay=15,msgT=0,cn=0,ckT='';
 function msg(t){const m=document.getElementById('msg');m.textContent=t;m.style.opacity=1;msgT=3.2}
 function mkB(br,male,name,x,z){FOUND[br.n]=1;const o=mkBird(br,male);const b={...o,br,male,name,fed:0,x,z,y:0,h:rr(0,6.28),st:'idle',t:rr(0,2),tx:0,tz:0,vy:0,ph:rr(0,9),seed:null,own:true,hu:rr(0,8),grow:0,chick:false};
 const c=document.createElement('canvas');c.width=400;c.height=120;b.lg=c.getContext('2d');b.lt=new T.CanvasTexture(c);
@@ -242,7 +242,7 @@ const list=birds.filter(b=>b.own).concat(extra),ad=list.filter(b=>!b.chick&&b.st
 const gl=list.filter(b=>b.y<.3&&b.st!='home'&&b.st!='out');
 for(let i=0;i<gl.length;i++){const a=gl[i],px=a.x-P.x,pz=a.z-P.z,pd=Math.hypot(px,pz);if(pd<1.1&&pd>.001){const k=1.1-pd;a.x+=px/pd*k*.5;a.z+=pz/pd*k*.5}
 for(let j=i+1;j<gl.length;j++){const c=gl[j];let dx=c.x-a.x,dz=c.z-a.z,d=Math.hypot(dx,dz);const m=(a.chick?.3:.55)+(c.chick?.3:.55);if(d<m){if(d<.001){dx=rr(-1,1);dz=1;d=Math.hypot(dx,dz)}const k=(m-d)/2;a.x-=dx/d*k;a.z-=dz/d*k;c.x+=dx/d*k;c.z+=dz/d*k}}}
-if(ml.length&&fl.length&&feeder>=3&&eggs.length<3&&list.length<14){lay-=dt;if(lay<=0){lay=rr(22,30);feeder-=3;const ni=[0,1,2].find(i=>!eggs.some(e=>e.n==i)),par=R()<.5?ml[0|R()*ml.length]:fl[0|R()*fl.length];
+if(ml.length&&fl.length&&feeder>=3&&eggs.length<3&&list.length<14){lay-=dt;if(lay<=0){lay=rr(18,25);feeder-=3;const ni=[0,1,2].find(i=>!eggs.some(e=>e.n==i)),par=R()<.5?ml[0|R()*ml.length]:fl[0|R()*fl.length];
 const m=mesh(SP(.13),0xffffff,CX+(ni-1)*1.6,.52,RZ0+.5);m.scale.set(1,1.3,1);scene.add(m);eggs.push({m,n:ni,t:18,br:R()<.3?BR[0|R()*BR.length]:par.br});msg('🥚 Kümeste yumurta var!')}}
 for(let i=eggs.length-1;i>=0;i--){const e=eggs[i];e.t-=dt;e.m.rotation.z=e.t<4?Math.sin(e.t*14)*.25:0;if(e.t<=0){scene.remove(e.m);const c=mkB(e.br,R()<.5,CN[cn++%CN.length],CX+(e.n-1)*1.6,RZ0+1);c.chick=true;drawLab(c);extra.push(c);eggs.splice(i,1);hud();msg('🐣 Yavru çıktı: '+c.name+(c.male?' ♂':' ♀'))}}
 grain.scale.y=Math.max(.05,feeder/30);grain.position.y=.28+.1*grain.scale.y;
