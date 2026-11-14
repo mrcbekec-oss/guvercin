@@ -26,9 +26,9 @@ canvas{display:block}
 #msg{top:20%;left:0;right:0;text-align:center;font-size:19px;font-weight:700;opacity:0;transition:opacity .3s;padding:0 14px}
 #fd{right:calc(124px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));width:64px;height:64px;font-size:26px}
 #fy{right:calc(124px + env(safe-area-inset-right,0px));bottom:calc(104px + env(safe-area-inset-bottom,0px));width:64px;height:64px;font-size:26px}
-#tk{display:none!important;right:calc(124px + env(safe-area-inset-right,0px));bottom:calc(104px + env(safe-area-inset-bottom,0px));width:64px;height:64px;font-size:26px}
+#up{position:fixed;right:calc(12px + env(safe-area-inset-right,0px));top:calc(210px + env(safe-area-inset-top,0px));padding:8px 12px;border:1px solid #fff9;border-radius:10px;background:#0008;color:#fff;font:700 15px system-ui,sans-serif;touch-action:manipulation}
 @media (pointer:coarse){#joy{display:block}.b{display:flex}#help{display:none}}
-@media (max-width:520px){#jr{font-size:10px;padding:5px 7px}#st{font-size:14px}}
+@media (max-width:520px){#jr{font-size:10px;padding:5px 7px}#st{font-size:14px}#up{top:auto;right:calc(124px + env(safe-area-inset-right,0px));bottom:calc(178px + env(safe-area-inset-bottom,0px));width:64px;height:64px;padding:4px;font-size:14px}}
 #end{position:fixed;inset:0;background:#000b;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:20px}
 #end button{font-size:18px;padding:10px 26px;border:0;border-radius:10px;background:#ffd24a;font-weight:700}
 </style></head><body>
@@ -36,7 +36,7 @@ canvas{display:block}
 <div class="ov" id="jr"></div>
 <div class="ov" id="tip"></div>
 <div class="ov" id="msg"></div>
-<div class="ov" id="help">W/A/S/D: yürü · Shift: koş · E/Boşluk: yem saç · F: besle (yemlik ya da yakındaki kuş) · V: kuşları uçur · fare/ok tuşları: bak</div>
+<div class="ov" id="help">W/A/S/D: yürü · Shift: koş · E/Boşluk: yem saç · F: besle (yemlik ya da yakındaki kuş) · U: kümesi büyüt · V: kuşları uçur · fare/ok tuşları: bak</div>
 <div id="xh"></div>
 <div id="joy"><div id="knob"></div></div>
 <div class="b" id="th">🌾</div>
@@ -44,7 +44,8 @@ canvas{display:block}
 <div class="b" id="fd">🥣</div>
 <div class="b" id="tk">🧺</div>
 <div class="b" id="fy">🕊️</div>
-<div id="end"><div style="font-size:54px">🕊️</div><h2 id="et"></h2><p>Bütün güvercin cinslerini kümeste çıkardın!</p><button onclick="location.reload()">Tekrar Oyna</button></div>
+<button id="up" type="button" aria-label="Kümesi büyüt">🏠+</button>
+<div id="end"><div style="font-size:54px">🕊️</div><h2 id="et"></h2><p>Bütün güvercin cinslerini kümeste çıkardın!</p><button onclick="newGame()">Tekrar Oyna</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const T=THREE,R=Math.random,rr=(a,b)=>a+R()*(b-a);
@@ -192,23 +193,31 @@ b.g.position.set(b.x,b.y,b.z);b.g.rotation.y=b.h;b.sh.position.set(b.x,.04,b.z);
 b.sp.visible=dp<30}
 // ---- ana döngü
 // ---- kümes
-const CX=18,CZ=-16,RX0=CX-4,RX1=CX+4,RZ0=CZ-5,RZ1=CZ+5,FX=CX,FZ=CZ+1.5,WD=0x9a6b3c;
+const CX=18,CZ=-16,FX=CX,FZ=CZ+1.5,WD=0x9a6b3c,COOP_MAX_LEVEL=3,COOP_COSTS=[100,200,300];
+let coopLevel=0,RX0=CX-4,RX1=CX+4,RZ0=CZ-5,RZ1=CZ+5;
+const coopModel=new T.Group(),coopObstacles=[];scene.add(coopModel);
+const coopCapacity=()=>14+coopLevel*4;
+function setCoopLevel(level){coopLevel=level;const sx=(4+level)/4,sz=(5+level)/5;
+RX0=CX-4-level;RX1=CX+4+level;RZ0=CZ-5-level;RZ1=CZ+5+level;
+coopModel.scale.set(sx,1,sz);coopModel.position.set(CX*(1-sx),0,CZ*(1-sz));
+for(const o of coopObstacles){o.x=CX+(o.baseX-CX)*sx;o.z=CZ+(o.baseZ-CZ)*sz}}
 const inRun=(x,z)=>x>RX0-.6&&x<RX1+.6&&z>RZ0-.6&&z<RZ1+.6;
-function post(x,z){scene.add(mesh(BX(.12,1.1,.12),WD,x,.55,z));obs.push({x,z,r:.32})}
-function rail(x0,z0,x1,z1){const l=Math.hypot(x1-x0,z1-z0),a=Math.atan2(z1-z0,x1-x0);for(const y of [.45,.9]){const m=mesh(BX(l,.07,.05),WD,(x0+x1)/2,y,(z0+z1)/2);m.rotation.y=-a;scene.add(m)}}
+function addCoopObstacle(x,z,r){const o={x,z,r,baseX:x,baseZ:z};obs.push(o);coopObstacles.push(o)}
+function post(x,z){coopModel.add(mesh(BX(.12,1.1,.12),WD,x,.55,z));addCoopObstacle(x,z,.32)}
+function rail(x0,z0,x1,z1){const l=Math.hypot(x1-x0,z1-z0),a=Math.atan2(z1-z0,x1-x0);for(const y of [.45,.9]){const m=mesh(BX(l,.07,.05),WD,(x0+x1)/2,y,(z0+z1)/2);m.rotation.y=-a;coopModel.add(m)}}
 for(let z=RZ0;z<=RZ1+.01;z+=.8){post(RX0,z);post(RX1,z)}
 for(let x=RX0;x<=RX1+.01;x+=.8){if(Math.abs(x-CX)>1.3)post(x,RZ1);if(Math.abs(x-CX)>2.7)post(x,RZ0)}
 rail(RX0,RZ0,RX0,RZ1);rail(RX1,RZ0,RX1,RZ1);rail(RX0,RZ1,CX-1.3,RZ1);rail(CX+1.3,RZ1,RX1,RZ1);rail(RX0,RZ0,CX-2.6,RZ0);rail(CX+2.6,RZ0,RX1,RZ0);
-const sol=(x,z)=>obs.push({x,z,r:.4});
+const sol=(x,z)=>addCoopObstacle(x,z,.4);
 for(let x=CX-2.6;x<=CX+2.61;x+=.7)sol(x,RZ0);for(let z=RZ0;z<=RZ0+3;z+=.7){sol(CX-2.6,z);sol(CX+2.6,z)}
-scene.add(mesh(BX(5.2,2.6,.2),WD,CX,1.3,RZ0),mesh(BX(.2,2.6,3),WD,CX-2.6,1.3,RZ0+1.5),mesh(BX(.2,2.6,3),WD,CX+2.6,1.3,RZ0+1.5),mesh(BX(5.2,.05,3),0xc9a86a,CX,.03,RZ0+1.5));
-const roof=mesh(BX(6,.15,4),0xb5483a,CX,2.8,RZ0+1.4);roof.rotation.x=.1;scene.add(roof);
-for(const s of [-2.6,2.6])scene.add(mesh(CY(.08,.08,2.7),WD,CX+s,1.35,RZ0+3));
-const perch=mesh(CY(.05,.05,4.4),0x7a5230,CX,1.2,RZ0+2);perch.rotation.z=Math.PI/2;scene.add(perch);
-for(let i=-1;i<=1;i++)scene.add(mesh(BX(.9,.4,.6),WD,CX+i*1.6,.2,RZ0+.5),mesh(BX(.7,.1,.45),0xe6c86a,CX+i*1.6,.42,RZ0+.5));
+coopModel.add(mesh(BX(5.2,2.6,.2),WD,CX,1.3,RZ0),mesh(BX(.2,2.6,3),WD,CX-2.6,1.3,RZ0+1.5),mesh(BX(.2,2.6,3),WD,CX+2.6,1.3,RZ0+1.5),mesh(BX(5.2,.05,3),0xc9a86a,CX,.03,RZ0+1.5));
+const roof=mesh(BX(6,.15,4),0xb5483a,CX,2.8,RZ0+1.4);roof.rotation.x=.1;coopModel.add(roof);
+for(const s of [-2.6,2.6])coopModel.add(mesh(CY(.08,.08,2.7),WD,CX+s,1.35,RZ0+3));
+const perch=mesh(CY(.05,.05,4.4),0x7a5230,CX,1.2,RZ0+2);perch.rotation.z=Math.PI/2;coopModel.add(perch);
+for(let i=-1;i<=1;i++)coopModel.add(mesh(BX(.9,.4,.6),WD,CX+i*1.6,.2,RZ0+.5),mesh(BX(.7,.1,.45),0xe6c86a,CX+i*1.6,.42,RZ0+.5));
 scene.add(mesh(BX(1.8,.28,.55),0x7a5230,FX,.14,FZ),mesh(CY(.35,.3,.15,12),0x4aa8e0,CX+2.6,.08,FZ));
 const grain=mesh(BX(1.6,.2,.4),0xe6b84a,FX,.3,FZ);scene.add(grain);
-const cs=spr(g=>{g.fillStyle='#000a';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 40px system-ui';g.textAlign='center';g.fillText('🏠 KÜMES',160,55)},320,80,4.2,1.05);cs.position.set(CX,4.4,RZ0+1.5);scene.add(cs);
+const cs=spr(g=>{g.fillStyle='#000a';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 40px system-ui';g.textAlign='center';g.fillText('🏠 KÜMES',160,55)},320,80,4.2,1.05);cs.position.set(CX,4.4,RZ0+1.5);coopModel.add(cs);
 function outRect(b){if(b.y>2)return;const m=.6;if(b.x>RX0-m&&b.x<RX1+m&&b.z>RZ0-m&&b.z<RZ1+m){const d=[b.x-(RX0-m),RX1+m-b.x,b.z-(RZ0-m),RZ1+m-b.z],i=d.indexOf(Math.min(...d));if(i==0)b.x=RX0-m;else if(i==1)b.x=RX1+m;else if(i==2)b.z=RZ0-m;else b.z=RZ1+m}}
 const extra=EX,CN=['Tüy','Kırıntı','Pıt','Çıtır','Cin','Zıpzıp','Mini','Fırfır','Pofuduk','Tombul','Bal','Kiraz','Nane','Limon','Yaprak','Minnoş'];
 let feeder=6,eggs=[],lay=15,msgT=0,cn=0,ckT='';
@@ -219,7 +228,43 @@ b.sp=new T.Sprite(new T.SpriteMaterial({map:b.lt,transparent:true,depthTest:fals
 b.sh=mesh(new T.CircleGeometry(.5,12),0x000000);b.sh.rotation.x=-Math.PI/2;b.sh.material.transparent=true;b.sh.material.opacity=.28;scene.add(b.sh);
 drawLab(b);scene.add(b.g);return b}
 extra.push(mkB(BR[0],true,'Çakıl',CX-1,CZ+3),mkB(BR[0],false,'Nar',CX+1,CZ+2),mkB(BR[1],false,'Mavi',CX+2,CZ+3));
-msg('🏠 Kümesin hazır, 3 kuşun var! Yemliğe yem koy (F)');hud();
+const SAVE_KEY='guvercin-besle-3d-save-v1';
+let saveElapsed=0,saveErrorShown=false,resetRequested=false;
+function saveGame(){if(resetRequested)return;const data={version:1,score,seeds,feeder,coopLevel,player:{x:P.x,z:P.z,head,pitch},lay,cn,
+birds:birds.concat(extra).filter(b=>b.own).map(b=>({br:b.br.n,male:b.male,name:b.name,fed:b.fed,x:b.x,z:b.z,chick:b.chick,grow:b.grow})),
+eggs:eggs.map(e=>({n:e.n,t:e.t,br:e.br.n}))};
+try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));saveErrorShown=false}
+catch(error){console.error('Oyun kaydedilemedi:',error);if(!saveErrorShown){msg('Oyun kaydedilemedi. Tarayıcı depolama iznini kontrol et.');saveErrorShown=true}}}
+function loadGame(){let raw;
+try{raw=localStorage.getItem(SAVE_KEY)}
+catch(error){console.error('Oyun kaydı okunamadı:',error);msg('Oyun kaydı okunamadı. Tarayıcı depolama iznini kontrol et.');return}
+if(!raw)return;
+try{const data=JSON.parse(raw),num=(v,min,max)=>{if(!Number.isFinite(v))throw Error('Geçersiz kayıt değeri');return Math.max(min,Math.min(max,v))};
+if(data.version!==1||!Array.isArray(data.birds)||data.birds.length>14+COOP_MAX_LEVEL*4+3||!Array.isArray(data.eggs)||data.eggs.length>3||!data.player)throw Error('Kayıt biçimi tanınmıyor');
+const savedCoopLevel=data.coopLevel===undefined?0:data.coopLevel;
+if(!Number.isInteger(savedCoopLevel)||savedCoopLevel<0||savedCoopLevel>COOP_MAX_LEVEL||data.birds.length>14+savedCoopLevel*4+3)throw Error('Kümes kaydı geçersiz');
+const savedBirds=data.birds.map(b=>{const br=BR.find(x=>x.n===b.br);if(!br||typeof b.name!=='string'||typeof b.male!=='boolean'||typeof b.chick!=='boolean')throw Error('Kuş kaydı geçersiz');
+return{br,male:b.male,name:b.name,fed:num(b.fed,0,100000),x:num(b.x,-64,64),z:num(b.z,-64,64),chick:b.chick,grow:num(b.grow,0,60)}});
+const savedEggs=data.eggs.map(e=>{const br=BR.find(x=>x.n===e.br);if(!br||!Number.isInteger(e.n)||e.n<0||e.n>2)throw Error('Yumurta kaydı geçersiz');return{n:e.n,t:num(e.t,.01,18),br}});
+if(new Set(savedEggs.map(e=>e.n)).size!==savedEggs.length)throw Error('Yumurta kaydı çakışıyor');
+const savedScore=num(data.score,0,Number.MAX_SAFE_INTEGER),savedSeeds=num(data.seeds,0,40),savedFeeder=num(data.feeder,0,30);
+const savedPlayer={x:num(data.player.x,-64,64),z:num(data.player.z,-64,64),head:num(data.player.head,-1e6,1e6),pitch:num(data.player.pitch,-1.1,1.1)};
+const savedLay=num(data.lay,.01,25),savedCn=Math.floor(num(data.cn,0,Number.MAX_SAFE_INTEGER));
+score=savedScore;seeds=savedSeeds;feeder=savedFeeder;setCoopLevel(savedCoopLevel);P.x=savedPlayer.x;P.z=savedPlayer.z;head=savedPlayer.head;pitch=savedPlayer.pitch;lay=savedLay;cn=savedCn;
+for(const name of Object.keys(FOUND))delete FOUND[name];
+for(const bird of extra){scene.remove(bird.g);scene.remove(bird.sh)}
+extra.splice(0,extra.length,...savedBirds.map(b=>{const bird=mkB(b.br,b.male,b.name,b.x,b.z);bird.fed=b.fed;bird.chick=b.chick;bird.grow=b.grow;drawLab(bird);return bird}));
+eggs.splice(0,eggs.length,...savedEggs.map(e=>{const m=mesh(SP(.13),0xffffff,CX+(e.n-1)*1.6,.52,RZ0+.5);m.scale.set(1,1.3,1);scene.add(m);return{m,n:e.n,t:e.t,br:e.br}}));
+grain.scale.y=Math.max(.05,feeder/30);grain.position.y=.28+.1*grain.scale.y;hud();
+}catch(error){console.error('Oyun kaydı yüklenemedi:',error);msg('Kayıt yüklenemedi; kayıt dosyası değiştirilmedi.')}}
+function newGame(){try{localStorage.removeItem(SAVE_KEY);resetRequested=true;location.reload()}
+catch(error){console.error('Yeni oyun başlatılamadı:',error);msg('Yeni oyun başlatılamadı; kayıt silinemedi.')}}
+function updateUpgradeButton(){const b=document.getElementById('up');if(coopLevel>=COOP_MAX_LEVEL){b.style.display='none';return}
+b.style.display='';b.textContent='🏠+';b.title='Kümesi büyüt ('+COOP_COSTS[coopLevel]+' puan)'}
+function upgradeCoop(){if(coopLevel>=COOP_MAX_LEVEL){msg('Kümes zaten en büyük boyutta.');return}
+const cost=COOP_COSTS[coopLevel];if(score<cost){msg('Kümesi büyütmek için '+cost+' puan gerekiyor.');return}
+score-=cost;setCoopLevel(coopLevel+1);updateUpgradeButton();ckT='';hud();msg('Kümes büyüdü! Kapasite '+coopCapacity()+' kuşa çıktı.')}
+msg('🏠 Kümesin hazır, 3 kuşun var! Yemliğe yem koy (F)');loadGame();updateUpgradeButton();hud();
 function updOwn(b,dt){b.ph+=dt;const dp=Math.hypot(b.x-P.x,b.z-P.z);let fl=0,pk=0,gs=b.male?1.12:.95;
 if(b.chick){b.grow+=dt*(feeder>0?1:.25);gs*=.5+.5*Math.min(1,b.grow/60);if(b.grow>=60){b.chick=false;drawLab(b);msg('🐥 '+b.name+' büyüdü!')}}
 b.g.scale.setScalar(gs);b.sp.scale.set(3.6/gs,1.08/gs,1);b.sp.position.y=1.9/gs;
@@ -242,11 +287,11 @@ const list=birds.filter(b=>b.own).concat(extra),ad=list.filter(b=>!b.chick&&b.st
 const gl=list.filter(b=>b.y<.3&&b.st!='home'&&b.st!='out');
 for(let i=0;i<gl.length;i++){const a=gl[i],px=a.x-P.x,pz=a.z-P.z,pd=Math.hypot(px,pz);if(pd<1.1&&pd>.001){const k=1.1-pd;a.x+=px/pd*k*.5;a.z+=pz/pd*k*.5}
 for(let j=i+1;j<gl.length;j++){const c=gl[j];let dx=c.x-a.x,dz=c.z-a.z,d=Math.hypot(dx,dz);const m=(a.chick?.3:.55)+(c.chick?.3:.55);if(d<m){if(d<.001){dx=rr(-1,1);dz=1;d=Math.hypot(dx,dz)}const k=(m-d)/2;a.x-=dx/d*k;a.z-=dz/d*k;c.x+=dx/d*k;c.z+=dz/d*k}}}
-if(ml.length&&fl.length&&feeder>=3&&eggs.length<3&&list.length<14){lay-=dt;if(lay<=0){lay=rr(18,25);feeder-=3;const ni=[0,1,2].find(i=>!eggs.some(e=>e.n==i)),par=R()<.5?ml[0|R()*ml.length]:fl[0|R()*fl.length];
+if(ml.length&&fl.length&&feeder>=3&&eggs.length<3&&list.length+eggs.length<coopCapacity()){lay-=dt;if(lay<=0){lay=rr(18,25);feeder-=3;const ni=[0,1,2].find(i=>!eggs.some(e=>e.n==i)),par=R()<.5?ml[0|R()*ml.length]:fl[0|R()*fl.length];
 const m=mesh(SP(.13),0xffffff,CX+(ni-1)*1.6,.52,RZ0+.5);m.scale.set(1,1.3,1);scene.add(m);eggs.push({m,n:ni,t:18,br:R()<.3?BR[0|R()*BR.length]:par.br});msg('🥚 Kümeste yumurta var!')}}
 for(let i=eggs.length-1;i>=0;i--){const e=eggs[i];e.t-=dt;e.m.rotation.z=e.t<4?Math.sin(e.t*14)*.25:0;if(e.t<=0){scene.remove(e.m);const c=mkB(e.br,R()<.5,CN[cn++%CN.length],CX+(e.n-1)*1.6,RZ0+1);c.chick=true;drawLab(c);extra.push(c);eggs.splice(i,1);hud();msg('🐣 Yavru çıktı: '+c.name+(c.male?' ♂':' ♀'))}}
 grain.scale.y=Math.max(.05,feeder/30);grain.position.y=.28+.1*grain.scale.y;
-const ch=list.filter(b=>b.chick).length,t='🏠 Kümes: '+list.length+' kuş'+(ch?' ('+ch+' yavru)':'')+(eggs.length?' · 🥚'+eggs.length:'')+' · 🥣 '+Math.floor(feeder)+'/30';
+const ch=list.filter(b=>b.chick).length,next=coopLevel<COOP_MAX_LEVEL?' · ⬆️'+COOP_COSTS[coopLevel]+'⭐':' · En büyük boyut',t='🏠 Kümes: '+list.length+'/'+coopCapacity()+' kuş · '+coopLevel+'/'+COOP_MAX_LEVEL+' kademe'+(ch?' ('+ch+' yavru)':'')+(eggs.length?' · 🥚'+eggs.length:'')+' · 🥣 '+Math.floor(feeder)+'/30'+next;
 if(t!=ckT){ckT=t;document.getElementById('ck').textContent=t}}
 function actFeed(){AC&&AC.resume();
 if(Math.hypot(P.x-FX,P.z-FZ)<3.4&&feeder<29.5){if(seeds<1){msg('Yemin yok! Tezgâha git 🌾');return}if(feeder>=30){msg('Yemlik dolu 🥣');return}const a=Math.min(10,Math.floor(seeds),30-Math.floor(feeder));seeds-=a;feeder+=a;beep(400,.04);msg('🥣 Yemliğe '+a+' yem koydun');hud();return}
@@ -256,17 +301,18 @@ if(seeds<1){msg('Yemin bitti! Tezgâha git 🌾');return}
 seeds-=1;nb.hand=4;eat(nb,{life:1});msg('✋ '+nb.name+' elinden yedi')}
 function actTake(){return;let nb=null,nd=3.6;for(const b of birds){if(b.own||b.st=='fly')continue;const d=Math.hypot(b.x-P.x,b.z-P.z);if(d<nd){nd=d;nb=b}}
 if(!nb){msg('Yakında alınacak kuş yok');return}
-if(birds.filter(b=>b.own).length+extra.length>=14){msg('Kümes dolu!');return}
+if(birds.filter(b=>b.own).length+extra.length>=coopCapacity()){msg('Kümes dolu! Önce kümesi büyüt.');return}
 if(nb.fed<2){msg(nb.name+' henüz güvenmiyor: ♥'+nb.fed+'/2 (önce besle)');return}
 nb.own=true;nb.st='home';nb.tx=CX+rr(-2,2);nb.tz=CZ+rr(-1,2);nb.hu=rr(0,8);nb.grow=0;nb.chick=false;msg('🏠 '+nb.name+' kümese gidiyor')}
-const fdB=document.getElementById('fd'),tkB=document.getElementById('tk');
+const fdB=document.getElementById('fd'),tkB=document.getElementById('tk'),upB=document.getElementById('up');
 fdB.addEventListener('pointerdown',e=>{actFeed();e.preventDefault()});tkB.addEventListener('pointerdown',e=>{actTake();e.preventDefault()});
-addEventListener('keydown',e=>{if(e.repeat)return;const k=e.key.toLowerCase();if(k=='f')actFeed();if(k=='g')actTake()});
-function actFly(){AC&&AC.resume();let n=0;for(const b of birds.filter(b=>b.own).concat(extra)){if(b.chick||b.st=='out'||b.st=='home')continue;b.st='out';b.t=rr(4,7);b.h=rr(0,6.28);b.ty=rr(3,5);b.sv=rr(0,6);n++}msg(n?'🕊️ Kuşlar uçtu, birazdan yuvalarına dönecek!':'Uçacak kuş yok (yavrular uçamaz)');if(n)beep(300,.04)}
+upB.addEventListener('click',upgradeCoop);
+addEventListener('keydown',e=>{if(e.repeat)return;const k=e.key.toLowerCase();if(k=='f')actFeed();if(k=='g')actTake();if(k=='u')upgradeCoop()});
+function actFly(){AC&&AC.resume();let n=0;for(const b of birds.filter(b=>b.own).concat(extra)){if(b.chick||b.st=='out'||b.st=='home')continue;b.st='out';b.t=rr(10,15);b.h=rr(0,6.28);b.ty=rr(3,5);b.sv=rr(0,6);n++}msg(n?'🕊️ Kuşlar uçtu, birazdan yuvalarına dönecek!':'Uçacak kuş yok (yavrular uçamaz)');if(n)beep(300,.04)}
 document.getElementById('fy').addEventListener('pointerdown',e=>{actFly();e.preventDefault()});
 addEventListener('keydown',e=>{if(!e.repeat&&e.key.toLowerCase()=='v')actFly()});
 const clock=new T.Clock();let help=14;
-function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05);
+function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05);saveElapsed+=dt;if(saveElapsed>=2){saveElapsed=0;saveGame()}
 if(K.arrowleft)head+=2.3*dt;if(K.arrowright)head-=2.3*dt;if(K.arrowup)pitch=Math.min(1.1,pitch+1.5*dt);if(K.arrowdown)pitch=Math.max(-1.1,pitch-1.5*dt);
 const mv=Math.max(-1,Math.min(1,(K.w?1:0)-(K.s?.6:0)+jy)),sv=Math.max(-1,Math.min(1,(K.d?1:0)-(K.a?1:0)+jx)),run=(K.shift||runT)?1.8:1;
 psp+=(mv*4.5*run-psp)*Math.min(1,9*dt);ssp+=(sv*4*run-ssp)*Math.min(1,9*dt);
@@ -290,5 +336,6 @@ if(help>0){help-=dt;if(help<=0)document.getElementById('help').style.display='no
 const sp2=Math.min(1,Math.hypot(psp,ssp)/3),cp2=Math.cos(pitch);cam.position.set(P.x,1.65+Math.sin(pw*1.1)*.05*sp2,P.z);cam.lookAt(P.x+Math.sin(head)*cp2,cam.position.y+Math.sin(pitch),P.z+Math.cos(head)*cp2);
 ren.render(scene,cam)}
 loop();
+addEventListener('pagehide',saveGame);
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
 </script></body></html>
