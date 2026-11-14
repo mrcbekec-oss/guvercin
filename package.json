@@ -1,0 +1,15 @@
+{
+  "name": "guvercin-besle-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Güvercin Besle 3D için oda tabanlı WebSocket sunucusu",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
