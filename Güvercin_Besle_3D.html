@@ -124,10 +124,16 @@ const BR=[
 {n:'Kaya Güvercini',b:0x8f98a8,h:0x6c7483,w:0x6a7487,k:0x3f9a8a},
 {n:'Taklacı',b:0xf4f4f4,h:0xf4f4f4,w:0xb5703a,k:0xe6e6e6},
 {n:'Posta Güvercini',b:0x5a6a8a,h:0x46547a,w:0x39455f,k:0x8a5ac0},
-{n:'Süs Güvercini',b:0xffffff,h:0xffffff,w:0xf0f0f0,k:0xffffff,fan:1},
-{n:'Gerdanlı Kumru',b:0xd9c3a0,h:0xe5d3b5,w:0xc2a67c,k:0xd9c3a0,col:1},
-{n:'Kızıl Güvercin',b:0xa8442f,h:0x8a3424,w:0x7a2c1c,k:0xd98a30},
-{n:'Siyah Güvercin',b:0x2a2a32,h:0x22222a,w:0x1c1c24,k:0x2fa07a}];
+{n:'Süs Güvercini',b:0xffffff,h:0xffffff,w:0xf0f0f0,k:0xffffff,fan:1,rare:true},
+{n:'Gerdanlı Kumru',b:0xd9c3a0,h:0xe5d3b5,w:0xc2a67c,k:0xd9c3a0,col:1,rare:true},
+{n:'Kızıl Güvercin',b:0xa8442f,h:0x8a3424,w:0x7a2c1c,k:0xd98a30,rare:true},
+{n:'Siyah Güvercin',b:0x2a2a32,h:0x22222a,w:0x1c1c24,k:0x2fa07a,rare:true},
+{n:'Mavi Alaca Güvercin',b:0x5f8ad6,h:0x4078b8,w:0x2a4d7f,k:0xc8dcff},
+{n:'Altın Kanat Güvercin',b:0xc6a15b,h:0xa7772d,w:0x7d5a2a,k:0xf4d27d,rare:true},
+{n:'Gümüş Yaka Güvercin',b:0xc4ccd8,h:0xadb6c0,w:0x7d8691,k:0xe5ecf7},
+{n:'Mor Gerdanlı Kumru',b:0x6d4eb6,h:0x4d3d90,w:0x2e245e,k:0xb783ff,col:1,rare:true},
+{n:'Ateş Kanatlı Güvercin',b:0x8c3d2d,h:0x6a271d,w:0x4b1d17,k:0xf6a85b,rare:true},
+{n:'Beyaz Taçlı Güvercin',b:0xf4f6f8,h:0xe9edf3,w:0xbfccd4,k:0xfef5d3,fan:1}];
 const NM=['Boncuk','Pamuk','Karabaş','Gümüş','Fındık','Duman','Zeytin','Bulut','Tarçın','Mercan','Çiko','Mısır','Badem','Paşa','Sultan','Lokum','Kestane','Ceylan','Şeker','Fıstık','Maviş','Kömür','Gölge','Bahar','Yıldız','Pırpır','Tombik','Çınar'];
 function mkBird(br,male){const g=new T.Group(),body=new T.Group();body.position.y=.45;g.add(body);
 const bd=mesh(SP(.5,24),br.b);bd.scale.set(1,.85,1.4);

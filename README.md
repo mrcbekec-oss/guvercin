@@ -13,7 +13,11 @@ Tarayıcıda `http://localhost:3000` adresini aç. Oyundaki **Online** düğmesi
 
 ## Online sürümün kapsamı
 
-Sunucu oyuncu konumlarını ve sahip oldukları güvercinlerin hareketlerini oda içinde gerçek zamanlı iletir. Oda sunucu belleğinde tutulur; sunucu kapanınca odalar ve bağlantılar silinir. Yıldızlar, kümes ilerlemesi ve açık artırma şu an her oyuncunun kendi kayıt alanındadır; ortak sunucu ekonomisi değildir.
+Sunucu oyuncu konumlarını, sahip oldukları güvercinlerin hareketlerini ve kümes seviyelerini oda içinde gerçek zamanlı iletir. Diğer oyuncuların kümeleri kendi kümelerinin çevresinde görünür. Kısa ağ kesintilerinde istemci aynı odaya otomatik yeniden bağlanmayı dener. Oda sunucu belleğinde tutulur; sunucu kapanınca odalar ve bağlantılar silinir. Yıldızlar, kümes ilerlemesi ve açık artırma şu an her oyuncunun kendi kayıt alanındadır; ortak sunucu ekonomisi değildir.
+
+Kuş satmak için kendi kuşunu **H** ile (mobilde **Kuş al** düğmesiyle) tut, **Kuş Satış** alanına götürüp bırak. Normal kuşlar 8⭐, nadir kuşlar 25⭐ verir; yabani kuşlar satılamaz.
+
+**Market** düğmesinden veya **M** tuşuyla marketi açıp yem torbasını büyütebilir, yem alabilir ve Kaya Güvercini, Taklacı veya Posta Güvercini satın alabilirsin. Diğer türler markette satışa sunulmaz.
 
 ## İnternette arkadaşlarla oynama
 

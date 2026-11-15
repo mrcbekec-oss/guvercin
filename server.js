@@ -54,6 +54,7 @@ function sanitizeState(value) {
     x: boundedNumber(value.x, -64, 64),
     z: boundedNumber(value.z, -64, 64),
     h: ((heading % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2),
+    coopLevel: Math.floor(boundedNumber(value.coopLevel, 0, 3)),
     birds
   };
 }
@@ -69,7 +70,7 @@ function broadcast(room, data, except) {
 }
 
 function playerView(client) {
-  return { id: client.id, name: client.name, state: client.state };
+  return { id: client.id, name: client.name, coopSlot: client.coopSlot, state: client.state };
 }
 
 function joinRoom(ws, message) {
@@ -93,13 +94,17 @@ function joinRoom(ws, message) {
   }
 
   const peers = [...room.values()];
+  const usedSlots = new Set(peers.map((peer) => peer.coopSlot));
+  let coopSlot = 0;
+  while (usedSlots.has(coopSlot)) coopSlot += 1;
   ws.id = randomUUID();
   ws.name = name;
+  ws.coopSlot = coopSlot;
   ws.room = roomCode;
   ws.state = null;
   ws.lastStateAt = 0;
   room.set(ws.id, ws);
-  send(ws, { type: 'welcome', id: ws.id, room: roomCode, players: peers.map(playerView) });
+  send(ws, { type: 'welcome', id: ws.id, room: roomCode, coopSlot, players: peers.map(playerView) });
   broadcast(room, { type: 'peer-join', player: playerView(ws) }, ws);
 }
 
@@ -163,13 +168,14 @@ server.on('upgrade', (req, socket, head) => {
 
 wss.on('connection', (ws) => {
   ws.isAlive = true;
+  ws.missedPongs = 0;
   const joinTimeout = setTimeout(() => {
     if (!ws.room) {
       send(ws, { type: 'error', message: 'Odaya katılma bilgisi gelmedi.' });
       ws.close(1008, 'Join required');
     }
   }, 5000);
-  ws.on('pong', () => { ws.isAlive = true; });
+  ws.on('pong', () => { ws.isAlive = true; ws.missedPongs = 0; });
   ws.on('message', (raw, isBinary) => {
     if (isBinary) {
       ws.close(1003, 'Text messages only');
@@ -209,9 +215,12 @@ wss.on('connection', (ws) => {
 const heartbeat = setInterval(() => {
   for (const ws of wss.clients) {
     if (!ws.isAlive) {
-      ws.terminate();
-      continue;
-    }
+      ws.missedPongs += 1;
+      if (ws.missedPongs >= 3) {
+        ws.terminate();
+        continue;
+      }
+    } else ws.missedPongs = 0;
     ws.isAlive = false;
     ws.ping();
   }

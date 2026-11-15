@@ -42,6 +42,22 @@ canvas{display:block}
 #auctionBid{width:100%;margin-top:9px;padding:9px;border:0;border-radius:8px;background:#ffd24a;color:#231a00;font:700 15px system-ui,sans-serif;touch-action:manipulation}
 #auctionBid:disabled{background:#777;color:#eee}
 #onlineBtn{position:fixed;left:12px;top:calc(145px + env(safe-area-inset-top,0px));z-index:7;padding:8px 12px;border:1px solid #fff9;border-radius:10px;background:#18202aee;color:#fff;font:700 14px system-ui,sans-serif;touch-action:manipulation}
+#shopBtn{position:fixed;left:12px;top:calc(195px + env(safe-area-inset-top,0px));z-index:7;padding:8px 12px;border:1px solid #fff9;border-radius:10px;background:#18202aee;color:#fff;font:700 14px system-ui,sans-serif;touch-action:manipulation}
+#shopPanel{position:fixed;display:none;left:50%;top:50%;transform:translate(-50%,-50%);z-index:14;width:min(440px,calc(100vw - 28px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:16px;border:1px solid #fff8;border-radius:14px;background:#18202af5;color:#fff;box-shadow:0 12px 40px #0008;overscroll-behavior:contain}
+#shopPanel.visible{display:block}
+#shopHeader{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#shopHeader h3{margin:0}
+#shopBalance{margin:8px 0 12px;color:#ffd24a;font-weight:800}
+.shopItem{margin-top:9px;padding:12px;border:1px solid #ffffff30;border-radius:10px;background:#ffffff0b}
+.shopItem h4{margin:0 0 4px;font-size:15px}
+.shopItem p{margin:0 0 9px;color:#e5e9ef;font-size:13px;line-height:1.4}
+.shopItem button,#shopClose,#shopHeader button{padding:9px 11px;border:0;border-radius:8px;background:#ffd24a;color:#231a00;font:700 13px system-ui,sans-serif;touch-action:manipulation}
+.shopItem button:disabled{background:#777;color:#eee}
+#birdSelector{display:flex;align-items:center;gap:8px}
+#birdSelector button{flex:0 0 auto;padding:7px 10px}
+#shopBirdInfo{flex:1;text-align:center;font-weight:700}
+#shopBirdInfo small{display:block;margin-top:3px;color:#e5e9ef;font-weight:400}
+#shopBirdBuy{width:100%;margin-top:9px}
 #onlinePanel{position:fixed;display:none;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;width:min(360px,calc(100vw - 28px));box-sizing:border-box;padding:16px;border:1px solid #fff8;border-radius:14px;background:#18202af2;color:#fff;box-shadow:0 12px 40px #0008}
 #onlinePanel.visible{display:block}
 #onlinePanel h3{margin:0 0 12px}
@@ -60,16 +76,37 @@ canvas{display:block}
 <div class="ov" id="jr"></div>
 <div class="ov" id="tip"></div>
 <div class="ov" id="msg"></div>
-<div class="ov" id="help">W/A/S/D: yürü · Shift: koş · E/Boşluk: yem saç · F: besle (yemlik ya da yakındaki kuş) · H: kuş al/bırak · U: kümesi büyüt · V: kuşları uçur · B: model yönünü çevir · fare/ok tuşları: bak</div>
+<div class="ov" id="help">W/A/S/D: yürü · Shift: koş · E/Boşluk: yem saç · F: besle (yemlik ya da yakındaki kuş) · H: kuş al/bırak · U: kümesi büyüt · M: market · V: kuşları uçur · B: model yönünü çevir · fare/ok tuşları: bak</div>
 <input type="file" id="gf" accept=".glb" hidden>
 <button id="onlineBtn" type="button">🌐 Online</button>
+<button id="shopBtn" type="button">🛒 Market</button>
+<section id="shopPanel" role="dialog" aria-modal="true" aria-labelledby="shopTitle" aria-hidden="true">
+  <div id="shopHeader"><h3 id="shopTitle">🛒 Kuş Marketi</h3><button id="shopClose" type="button" aria-label="Marketten çık">✕</button></div>
+  <div id="shopBalance"></div>
+  <div class="shopItem">
+    <h4>🎒 Daha büyük yem torbası</h4>
+    <p id="shopBagDescription"></p>
+    <button id="shopBagBuy" type="button"></button>
+  </div>
+  <div class="shopItem">
+    <h4>🌾 Yem paketi</h4>
+    <p>Torban boşken hızlıca yem al. Tezgâhın yanındaki ücretsiz dolum devam eder.</p>
+    <button id="shopSeedBuy" type="button"></button>
+  </div>
+  <div class="shopItem">
+    <h4>🕊️ Satılık güvercin</h4>
+    <p>Irkları incele, beğendiğin kuşu kümese kat.</p>
+    <div id="birdSelector"><button id="shopBirdPrev" type="button" aria-label="Önceki kuş">◀</button><div id="shopBirdInfo"></div><button id="shopBirdNext" type="button" aria-label="Sonraki kuş">▶</button></div>
+    <button id="shopBirdBuy" type="button"></button>
+  </div>
+</section>
 <section id="onlinePanel" aria-label="Online oda">
   <h3>🌐 Online oda</h3>
   <label>Oyuncu adı<input id="onlineName" maxlength="16" value="Misafir" autocomplete="nickname"></label>
   <label>Oda kodu<input id="onlineCode" maxlength="8" placeholder="6 karakter" autocomplete="off"></label>
   <div id="onlineActions"><button id="onlineCreate" type="button">Oda oluştur</button><button id="onlineJoin" type="button">Katıl</button></div>
   <button id="onlineCopy" type="button" disabled>Daveti kopyala</button>
-  <div id="onlineStatus" aria-live="polite">Aynı kodla giren oyuncular ve kuşları görünür.</div>
+  <div id="onlineStatus" aria-live="polite">  Aynı kodla giren oyuncular, kuşları ve kümeleri görünür.</div>
   <input id="onlineLink" readonly hidden aria-label="Davet bağlantısı">
 </section>
 <div id="xh"></div>
@@ -133,7 +170,7 @@ for(let i=0;i<4;i++)stand.add(mesh(BX(.35,.3,.3),0xf2c26b,-.9+i*.6,1.15,0));
 scene.add(stand);obs.push({x:SX,z:SZ,r:2});
 function spr(draw,w,h,sx,sy){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g);const t=new T.CanvasTexture(c);
 const s=new T.Sprite(new T.SpriteMaterial({map:t,transparent:true,depthTest:false}));s.scale.set(sx,sy,1);s.renderOrder=10;return s}
-const sign=spr(g=>{g.fillStyle='#000a';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 40px system-ui';g.textAlign='center';g.fillText('🌾 YEM TEZGAHI',160,55)},320,80,4.5,1.1);
+const sign=spr(g=>{g.fillStyle='#000a';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 40px system-ui';g.textAlign='center';g.fillText('🛒 KUŞ MARKETİ',160,55)},320,80,4.5,1.1);
 sign.position.set(SX,3.6,SZ);scene.add(sign);
 // ---- ağaçlar, bankler, lambalar, çiçekler
 const free=(x,z,m=3)=>!(Math.abs(x)<m+1||Math.abs(z)<m+1)&&Math.hypot(x,z)>9&&Math.hypot(x-SX,z-SZ)>5&&Math.hypot(x-18,z+16)>9;
@@ -171,7 +208,13 @@ const BR=[
 {n:'Süs Güvercini',b:0xffffff,h:0xffffff,w:0xf0f0f0,k:0xffffff,fan:1,rare:true},
 {n:'Gerdanlı Kumru',b:0xd9c3a0,h:0xe5d3b5,w:0xc2a67c,k:0xd9c3a0,col:1,rare:true},
 {n:'Kızıl Güvercin',b:0xa8442f,h:0x8a3424,w:0x7a2c1c,k:0xd98a30,rare:true},
-{n:'Siyah Güvercin',b:0x2a2a32,h:0x22222a,w:0x1c1c24,k:0x2fa07a,rare:true}];
+{n:'Siyah Güvercin',b:0x2a2a32,h:0x22222a,w:0x1c1c24,k:0x2fa07a,rare:true},
+{n:'Mavi Alaca Güvercin',b:0x5f8ad6,h:0x4078b8,w:0x2a4d7f,k:0xc8dcff},
+{n:'Altın Kanat Güvercin',b:0xc6a15b,h:0xa7772d,w:0x7d5a2a,k:0xf4d27d,rare:true},
+{n:'Gümüş Yaka Güvercin',b:0xc4ccd8,h:0xadb6c0,w:0x7d8691,k:0xe5ecf7},
+{n:'Mor Gerdanlı Kumru',b:0x6d4eb6,h:0x4d3d90,w:0x2e245e,k:0xb783ff,col:1,rare:true},
+{n:'Ateş Kanatlı Güvercin',b:0x8c3d2d,h:0x6a271d,w:0x4b1d17,k:0xf6a85b,rare:true},
+{n:'Beyaz Taçlı Güvercin',b:0xf4f6f8,h:0xe9edf3,w:0xbfccd4,k:0xfef5d3,fan:1}];
 const NM=['Boncuk','Pamuk','Karabaş','Gümüş','Fındık','Duman','Zeytin','Bulut','Tarçın','Mercan','Çiko','Mısır','Badem','Paşa','Sultan','Lokum','Kestane','Ceylan','Şeker','Fıstık','Maviş','Kömür','Gölge','Bahar','Yıldız','Pırpır','Tombik','Çınar'];
 function mkBird(br,male){const g=new T.Group(),body=new T.Group();body.position.y=.45;g.add(body);
 const bd=mesh(SP(.5,24),br.b);bd.scale.set(1,.85,1.4);
@@ -205,11 +248,11 @@ const fx=Math.sin(head),fz=Math.cos(head);
 for(let i=0;i<4;i++){const m=new T.Mesh(sg,M(0xe6b84a));m.scale.y=.7;const s={m,x:P.x+fx*.5,y:1.4,z:P.z+fz*.5,vx:fx*rr(3,5.5)+rr(-1.2,1.2),vy:rr(2.5,4)+pitch*4,vz:fz*rr(3,5.5)+rr(-1.2,1.2),land:0,life:30};scene.add(m);seedsA.push(s)}}
 let AC;function beep(f,v){try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;o.type='sine';g.gain.value=v;g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.15);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+.16)}catch(e){}}
 // ---- günlük (HUD)
-var EX=[],FOUND={};const jr=document.getElementById('jr');jr.onclick=()=>jr.classList.toggle('c');if(innerWidth<700)jr.classList.add('c');
+var EX=[],FOUND={};let seedBagLevel=0,shopUiReady=false;const seedCapacity=()=>40+seedBagLevel*20,BAG_COSTS=[40,80,150];const jr=document.getElementById('jr');jr.onclick=()=>jr.classList.toggle('c');if(innerWidth<700)jr.classList.add('c');
 function hud(){const n=Object.keys(FOUND).length;document.getElementById('sc').textContent='⭐ '+score+'  ·  Cins: '+n+'/'+BR.length;
-document.getElementById('sd').textContent='🌾 Yem: '+Math.floor(seeds);document.querySelector('#bar i').style.width=seeds/40*100+'%';
+document.getElementById('sd').textContent='🌾 Yem: '+Math.floor(seeds)+'/'+seedCapacity();document.querySelector('#bar i').style.width=seeds/seedCapacity()*100+'%';
 jr.innerHTML='<b>📖 Kuş Defteri</b>'+BR.map(br=>{const f=birds.concat(EX).filter(b=>b.br==br).length;return '<div><span style="background:#'+br.b.toString(16).padStart(6,'0')+'"></span>'+(FOUND[br.n]?br.n+' ×'+f+' ✓':'??? (henüz çıkmadı)')+'</div>'}).join('');
-if(n==BR.length&&!over){over=1;document.getElementById('et').textContent='Süre: '+((performance.now()-t0)/1000).toFixed(0)+' sn · Puan: '+score;document.getElementById('end').style.display='flex'}}
+if(n==BR.length&&!over){over=1;document.getElementById('et').textContent='Süre: '+((performance.now()-t0)/1000).toFixed(0)+' sn · Puan: '+score;document.getElementById('end').style.display='flex'}if(shopUiReady&&shopPanel.classList.contains('visible'))updateShopUI()}
 let score=0,over=0,t0=performance.now();hud();
 // ---- kontroller
 const K={};addEventListener('keydown',e=>{K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();AC&&AC.resume()});addEventListener('keyup',e=>K[e.key.toLowerCase()]=0);
@@ -248,20 +291,26 @@ b.g.position.set(b.x,b.y,b.z);b.g.rotation.y=b.h;b.sh.position.set(b.x,.04,b.z);
 b.sp.visible=dp<30}
 // ---- ana döngü
 // ---- kümes
-const CX=18,CZ=-16,FX=CX,FZ=CZ+1.5,WD=0x9a6b3c,COOP_MAX_LEVEL=3,COOP_COSTS=[100,200,300];
-let coopLevel=0,RX0=CX-4,RX1=CX+4,RZ0=CZ-5,RZ1=CZ+5;
+const DEFAULT_COOP_CENTER={x:18,z:-16};
+const CX=DEFAULT_COOP_CENTER.x,CZ=DEFAULT_COOP_CENTER.z,FX=CX,FZ=CZ+1.5,WD=0x9a6b3c,COOP_MAX_LEVEL=3,COOP_COSTS=[100,200,300];
+let coopLevel=0,coopCenter={x:CX,z:CZ},RX0=CX-4,RX1=CX+4,RZ0=CZ-5,RZ1=CZ+5;
 const coopModel=new T.Group(),coopObstacles=[];scene.add(coopModel);
 const marketGroup=new T.Group();marketGroup.visible=false;scene.add(marketGroup);
+function coopPositionForSlot(slot){const safeSlot=Number.isInteger(slot)?Math.max(0,slot):0;const angle=(safeSlot/REMOTE_COOP_SLOTS)*Math.PI*2-Math.PI/2;return{x:DEFAULT_COOP_CENTER.x+Math.cos(angle)*28,z:DEFAULT_COOP_CENTER.z+Math.sin(angle)*28}}
+function setLocalCoopSlot(slot){const target=coopPositionForSlot(slot);const dx=target.x-coopCenter.x,dz=target.z-coopCenter.z;if(!dx&&!dz)return;coopCenter=target;const shift=(obj)=>{if(!obj||!obj.position)return;obj.position.x+=dx;obj.position.z+=dz};shift(coopModel);shift(grain);shift(fw);shift(stand);for(const bird of birds.concat(extra)){bird.x+=dx;bird.z+=dz;bird.g.position.x+=dx;bird.g.position.z+=dz;bird.sh.position.x+=dx;bird.sh.position.z+=dz;if(bird.sp){bird.sp.position.x+=dx;bird.sp.position.z+=dz}if(bird.hold){bird.hold.position.x+=dx;bird.hold.position.z+=dz}}for(const egg of eggs){egg.m.position.x+=dx;egg.m.position.z+=dz}P.x+=dx;P.z+=dz;RX0+=dx;RX1+=dx;RZ0+=dz;RZ1+=dz;const c=coopCenter;for(const o of coopObstacles){o.x+=dx;o.z+=dz;o.baseX+=dx;o.baseZ+=dz}for(const o of obs.filter(o=>o.baseX!=null&&o.baseZ!=null)){o.x+=dx;o.z+=dz}if(typeof updateUpgradeButton==='function')updateUpgradeButton();}
+
 marketGroup.add(mesh(BX(4.2,.22,1.8),0x9a6b3c,0,1.1,0));
+const saleGroup=new T.Group();saleGroup.visible=false;scene.add(saleGroup);
+let saleSpot=null;
 for(const x of [-1.8,1.8])for(const z of [-.65,.65])marketGroup.add(mesh(BX(.12,2.6,.12),0x7a5230,x,1.3,z));
 marketGroup.add(mesh(BX(4.6,.18,2.3),0xb5483a,0,2.7,0));
 const marketSign=spr(g=>{g.fillStyle='#000b';g.fillRect(0,0,320,80);g.fillStyle='#ffd24a';g.font='bold 34px system-ui';g.textAlign='center';g.fillText('🐦 KUŞ PAZARI',160,55)},320,80,4.6,1.15);
 marketSign.position.set(0,3.8,.05);marketGroup.add(marketSign);
 const coopCapacity=()=>14+coopLevel*4;
 function setCoopLevel(level){coopLevel=level;const sx=(4+level)/4,sz=(5+level)/5;
-RX0=CX-4-level;RX1=CX+4+level;RZ0=CZ-5-level;RZ1=CZ+5+level;
-coopModel.scale.set(sx,1,sz);coopModel.position.set(CX*(1-sx),0,CZ*(1-sz));
-for(const o of coopObstacles){o.x=CX+(o.baseX-CX)*sx;o.z=CZ+(o.baseZ-CZ)*sz}}
+RX0=coopCenter.x-4-level;RX1=coopCenter.x+4+level;RZ0=coopCenter.z-5-level;RZ1=coopCenter.z+5+level;
+coopModel.scale.set(sx,1,sz);coopModel.position.set(coopCenter.x*(1-sx),0,coopCenter.z*(1-sz));
+for(const o of coopObstacles){o.x=coopCenter.x+(o.baseX-coopCenter.x)*sx;o.z=coopCenter.z+(o.baseZ-coopCenter.z)*sz}}
 const inRun=(x,z)=>x>RX0-.6&&x<RX1+.6&&z>RZ0-.6&&z<RZ1+.6;
 function addCoopObstacle(x,z,r){const o={x,z,r,baseX:x,baseZ:z};obs.push(o);coopObstacles.push(o)}
 function post(x,z){coopModel.add(mesh(BX(.12,1.1,.12),WD,x,.55,z));addCoopObstacle(x,z,.32)}
@@ -358,7 +407,7 @@ b.g.position.set(b.x,0,b.z);b.g.rotation.y=b.h;b.tag.position.set(b.x,2.5,b.z);b
 function rivalTick(dt){for(const b of rivalBirds)rivalBirdTick(b,dt);for(const b of rivalBots)rivalBotTick(b,dt)}
 const SAVE_KEY='guvercin-besle-3d-save-v1';
 let saveElapsed=0,saveErrorShown=false,resetRequested=false;
-function saveGame(){if(resetRequested)return;const data={version:1,score,seeds,feeder,coopLevel,player:{x:P.x,z:P.z,head,pitch},lay,cn,
+function saveGame(){if(resetRequested)return;const data={version:1,score,seeds,feeder,coopLevel,bagLevel:seedBagLevel,player:{x:P.x,z:P.z,head,pitch},lay,cn,
 birds:birds.concat(extra).filter(b=>b.own).map(b=>({br:b.br.n,male:b.male,name:b.name,fed:b.fed,x:b.x,z:b.z,chick:b.chick,grow:b.grow,flight:b.st=='out'||b.st=='home'})),
 eggs:eggs.map(e=>({n:e.n,t:e.t,br:e.br.n}))};
 try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));saveErrorShown=false}
@@ -369,16 +418,17 @@ catch(error){console.error('Oyun kaydı okunamadı:',error);msg('Oyun kaydı oku
 if(!raw)return;
 try{const data=JSON.parse(raw),num=(v,min,max)=>{if(!Number.isFinite(v))throw Error('Geçersiz kayıt değeri');return Math.max(min,Math.min(max,v))};
 if(data.version!==1||!Array.isArray(data.birds)||data.birds.length>14+COOP_MAX_LEVEL*4+3||!Array.isArray(data.eggs)||data.eggs.length>3||!data.player)throw Error('Kayıt biçimi tanınmıyor');
-const savedCoopLevel=data.coopLevel===undefined?0:data.coopLevel;
+const savedCoopLevel=data.coopLevel===undefined?0:data.coopLevel,savedBagLevel=data.bagLevel===undefined?0:data.bagLevel;
 if(!Number.isInteger(savedCoopLevel)||savedCoopLevel<0||savedCoopLevel>COOP_MAX_LEVEL||data.birds.length>14+savedCoopLevel*4+3)throw Error('Kümes kaydı geçersiz');
+if(!Number.isInteger(savedBagLevel)||savedBagLevel<0||savedBagLevel>BAG_COSTS.length)throw Error('Torba kaydı geçersiz');
 const savedBirds=data.birds.map(b=>{const br=BR.find(x=>x.n===b.br);if(!br||typeof b.name!=='string'||typeof b.male!=='boolean'||typeof b.chick!=='boolean')throw Error('Kuş kaydı geçersiz');
 return{br,male:b.male,name:b.name,fed:num(b.fed,0,100000),x:num(b.x,-64,64),z:num(b.z,-64,64),chick:b.chick,grow:num(b.grow,0,60),flight:b.flight===true}});
 const savedEggs=data.eggs.map(e=>{const br=BR.find(x=>x.n===e.br);if(!br||!Number.isInteger(e.n)||e.n<0||e.n>2)throw Error('Yumurta kaydı geçersiz');return{n:e.n,t:num(e.t,.01,18),br}});
 if(new Set(savedEggs.map(e=>e.n)).size!==savedEggs.length)throw Error('Yumurta kaydı çakışıyor');
-const savedScore=num(data.score,0,Number.MAX_SAFE_INTEGER),savedSeeds=num(data.seeds,0,40),savedFeeder=num(data.feeder,0,30);
+const savedScore=num(data.score,0,Number.MAX_SAFE_INTEGER),savedSeeds=num(data.seeds,0,40+savedBagLevel*20),savedFeeder=num(data.feeder,0,30);
 const savedPlayer={x:num(data.player.x,-64,64),z:num(data.player.z,-64,64),head:num(data.player.head,-1e6,1e6),pitch:num(data.player.pitch,-1.1,1.1)};
 const savedLay=num(data.lay,.01,25),savedCn=Math.floor(num(data.cn,0,Number.MAX_SAFE_INTEGER));
-score=savedScore;seeds=savedSeeds;feeder=savedFeeder;setCoopLevel(savedCoopLevel);P.x=savedPlayer.x;P.z=savedPlayer.z;head=savedPlayer.head;pitch=savedPlayer.pitch;lay=savedLay;cn=savedCn;
+score=savedScore;seeds=savedSeeds;feeder=savedFeeder;seedBagLevel=savedBagLevel;setCoopLevel(savedCoopLevel);P.x=savedPlayer.x;P.z=savedPlayer.z;head=savedPlayer.head;pitch=savedPlayer.pitch;lay=savedLay;cn=savedCn;
 for(const name of Object.keys(FOUND))delete FOUND[name];
 for(const bird of extra){scene.remove(bird.g);scene.remove(bird.sh)}
 extra.splice(0,extra.length,...savedBirds.map(b=>{const bird=mkB(b.br,b.male,b.name,b.x,b.z);bird.fed=b.fed;bird.chick=b.chick;bird.grow=b.grow;
@@ -394,6 +444,31 @@ b.style.display='';b.textContent='🏠+';b.title='Kümesi büyüt ('+COOP_COSTS[
 function upgradeCoop(){if(coopLevel>=COOP_MAX_LEVEL){msg('Kümes zaten en büyük boyutta.');return}
 const cost=COOP_COSTS[coopLevel];if(score<cost){msg('Kümesi büyütmek için '+cost+' puan gerekiyor.');return}
 score-=cost;setCoopLevel(coopLevel+1);updateUpgradeButton();ckT='';hud();msg('Kümes büyüdü! Kapasite '+coopCapacity()+' kuşa çıktı.')}
+const SHOP_BIRDS=BR.slice(0,3);let shopBirdIndex=0;
+const shopPanel=document.getElementById('shopPanel'),shopBtn=document.getElementById('shopBtn'),shopBagBuy=document.getElementById('shopBagBuy'),shopSeedBuy=document.getElementById('shopSeedBuy'),shopBirdBuy=document.getElementById('shopBirdBuy');
+function updateShopUI(){const offer=SHOP_BIRDS[shopBirdIndex],bagCost=BAG_COSTS[seedBagLevel],room=Math.max(0,seedCapacity()-Math.floor(seeds)),seedAmount=Math.min(20,room);
+document.getElementById('shopBalance').textContent='⭐ '+score;
+document.getElementById('shopBagDescription').textContent=seedBagLevel>=BAG_COSTS.length?'Torban en büyük boyutta ('+seedCapacity()+' yem).':'Kapasite: '+seedCapacity()+' → '+(seedCapacity()+20)+' yem.';
+shopBagBuy.textContent=seedBagLevel>=BAG_COSTS.length?'Torba en büyük boyutta':'Torbayı büyüt · ⭐'+bagCost;
+shopBagBuy.disabled=seedBagLevel>=BAG_COSTS.length||score<bagCost;
+shopSeedBuy.textContent=seedAmount?'Yem al · +'+seedAmount+' · ⭐'+seedAmount:'Torban dolu';
+shopSeedBuy.disabled=!seedAmount||score<seedAmount;
+document.getElementById('shopBirdInfo').innerHTML=offer.n+'<small>🕊️ Normal · 40⭐</small>';
+shopBirdBuy.textContent='Kuşu al · ⭐40';
+shopBirdBuy.disabled=score<40||birds.filter(b=>b.own).length+extra.length+eggs.length>=coopCapacity()}
+function openShop(){updateShopUI();shopPanel.classList.add('visible');shopPanel.setAttribute('aria-hidden','false')}
+function closeShop(){shopPanel.classList.remove('visible');shopPanel.setAttribute('aria-hidden','true')}
+shopBtn.addEventListener('click',openShop);document.getElementById('shopClose').addEventListener('click',closeShop);
+document.getElementById('shopBagBuy').addEventListener('click',()=>{if(seedBagLevel>=BAG_COSTS.length)return;const cost=BAG_COSTS[seedBagLevel];if(score<cost){msg('Torbayı büyütmek için ⭐'+cost+' gerekiyor.');return}
+score-=cost;seedBagLevel++;hud();saveGame();updateShopUI();beep(520,.05);msg('🎒 Torban büyüdü · '+seedCapacity()+' yem taşıyabilirsin.')});
+shopSeedBuy.addEventListener('click',()=>{const amount=Math.min(20,Math.max(0,seedCapacity()-Math.floor(seeds)));if(!amount)return;if(score<amount){msg('Yem paketi için ⭐'+amount+' gerekiyor.');return}
+score-=amount;seeds+=amount;hud();saveGame();updateShopUI();beep(400,.04);msg('🌾 '+amount+' yem aldın.')});
+document.getElementById('shopBirdPrev').addEventListener('click',()=>{shopBirdIndex=(shopBirdIndex+SHOP_BIRDS.length-1)%SHOP_BIRDS.length;updateShopUI()});
+document.getElementById('shopBirdNext').addEventListener('click',()=>{shopBirdIndex=(shopBirdIndex+1)%SHOP_BIRDS.length;updateShopUI()});
+shopBirdBuy.addEventListener('click',()=>{const br=SHOP_BIRDS[shopBirdIndex],cost=40,full=birds.filter(b=>b.own).length+extra.length+eggs.length>=coopCapacity();
+if(full){msg('Kümes dolu; yeni kuş almak için yer aç.');updateShopUI();return}if(score<cost){msg('Bu kuş için ⭐'+cost+' gerekiyor.');return}
+score-=cost;const b=mkB(br,R()<.5,CN[cn++%CN.length],coopCenter.x+rr(-2,2),coopCenter.z+rr(1,3));extra.push(b);shopBirdIndex=(shopBirdIndex+1)%SHOP_BIRDS.length;hud();saveGame();updateShopUI();beep(620,.06);msg('🎉 '+b.name+' kümese katıldı!')});
+addEventListener('keydown',e=>{if(e.repeat)return;if(e.key=='Escape'&&shopPanel.classList.contains('visible'))closeShop();else if(e.key.toLowerCase()=='m')shopPanel.classList.contains('visible')?closeShop():openShop()});shopUiReady=true;
 const auctionPanel=document.getElementById('auction'),auctionTitle=document.getElementById('auctionTitle'),auctionStatus=document.getElementById('auctionStatus'),auctionTimer=document.getElementById('auctionTimer'),auctionBid=document.getElementById('auctionBid'),marketCue=document.getElementById('marketCue');
 const marketRivals=['Murat','Ayşe','Deniz','Ece','Emre','Zeynep'];
 let marketWait=wr(60,120),marketActive=false,marketAuction=null,marketSpot=null,marketObstacle=null,marketUiWait=0;
@@ -402,7 +477,13 @@ const edgeX=Math.max(0,Math.abs(x-CX)-(4+COOP_MAX_LEVEL)),edgeZ=Math.max(0,Math.
 if(Math.hypot(x-CX,z-CZ)<12||Math.hypot(edgeX,edgeZ)<5||!free(x,z,4)||obs.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+5)||rivalCoops.some(o=>Math.hypot(x-o.x,z-o.z)<12))continue;return{x,z}}return null}
 function setupMarket(){marketSpot=findMarketSpot();if(!marketSpot){console.error('Kümes yakınında güvenli pazar yeri bulunamadı.');return}
 marketGroup.position.set(marketSpot.x,0,marketSpot.z);marketGroup.rotation.y=Math.atan2(P.x-marketSpot.x,P.z-marketSpot.z);marketGroup.visible=true;
-marketObstacle={x:marketSpot.x,z:marketSpot.z,r:2.7};obs.push(marketObstacle);updateAuctionUI()}
+marketObstacle={x:marketSpot.x,z:marketSpot.z,r:2.7};obs.push(marketObstacle);
+saleSpot=findMarketSpot();if(!saleSpot){console.error('Kuş satışı için güvenli alan bulunamadı.');return}
+const saleFloor=new T.Mesh(new T.CircleGeometry(3.2,32),new T.MeshStandardMaterial({color:0x4ca66b,transparent:true,opacity:.55}));saleFloor.rotation.x=-Math.PI/2;saleFloor.position.y=.05;saleGroup.add(saleFloor);
+for(const [x,z,w,d] of [[0,-3.1,6.2,.18],[0,3.1,6.2,.18],[-3.1,0,.18,6.2],[3.1,0,.18,6.2]])saleGroup.add(mesh(BX(w,.45,d),0x8b5a2b,x,.45,z));
+for(const [x,z] of [[-3.1,-3.1],[3.1,-3.1],[-3.1,3.1],[3.1,3.1]])saleGroup.add(mesh(BX(.3,1,.3),0x70451f,x,.5,z));
+const saleSign=spr(ctx=>{ctx.fillStyle='#000b';ctx.fillRect(0,0,320,80);ctx.fillStyle='#ffe082';ctx.font='bold 30px system-ui';ctx.textAlign='center';ctx.fillText('KUŞ SATIŞ',160,34);ctx.fillStyle='#fff';ctx.font='20px system-ui';ctx.fillText('8⭐ · nadir 25⭐',160,64)},320,80,3.2,.8);saleSign.position.set(0,3.2,0);saleGroup.add(saleSign);
+saleGroup.position.set(saleSpot.x,0,saleSpot.z);saleGroup.visible=true;updateAuctionUI()}
 function startMarket(){if(!marketSpot){console.error('Pazar yeri kurulamadı; oyun alanında uygun yer bulunamadı.');marketWait=20;return}
 marketActive=true;marketGroup.visible=true;
 const rare=R()<.3,pool=BR.filter(b=>!!b.rare===rare),br=pool[Math.floor(R()*pool.length)],startBid=rare?(15+Math.floor(R()*16))*10:(5+Math.floor(R()*6))*10;
@@ -473,7 +554,9 @@ if(!nb){msg('Yakında kuş yok. Bir kuşa yaklaş ya da yemliğe git');return}
 if(seeds<1){msg('Yemin bitti! Tezgâha git 🌾');return}
 seeds-=1;nb.hand=4;eat(nb,{life:1});msg('✋ '+nb.name+' elinden yedi')}
 function syncTakeButton(){tkB.textContent=heldBird?'Bırak':'Kuş al';tkB.title=heldBird?'Kuşu bırak':'Kuş al';tkB.setAttribute('aria-label',heldBird?'Kuşu bırak':'Kuş al')}
-function actTake(){if(heldBird){const b=heldBird;heldBird=null;heldBirdAnchor.remove(b.g);scene.add(b.g);b.x=P.x+Math.sin(head)*1.5;b.z=P.z+Math.cos(head)*1.5;b.y=0;b.h=head;b.st='idle';b.t=rr(1,2);b.g.position.set(b.x,0,b.z);b.g.rotation.set(0,head,0);b.g.scale.setScalar(1);b.body.rotation.x=0;b.sp.visible=true;b.sh.visible=true;syncTakeButton();msg('🕊️ '+b.name+' yere bırakıldı');return}
+function actTake(){if(heldBird){const b=heldBird,dropX=P.x+Math.sin(head)*1.5,dropZ=P.z+Math.cos(head)*1.5;
+if(b.own&&saleSpot&&Math.hypot(dropX-saleSpot.x,dropZ-saleSpot.z)<3.2){heldBird=null;heldBirdAnchor.remove(b.g);scene.remove(b.sh);scene.remove(b.sp);const list=birds.includes(b)?birds:extra,index=list.indexOf(b);if(index>=0)list.splice(index,1);const value=b.br.rare?25:8;score+=value;hud();saveGame();syncTakeButton();syncWatchControl();msg('🕊️ '+b.name+' satıldı · +'+value+'⭐');return}
+heldBird=null;heldBirdAnchor.remove(b.g);scene.add(b.g);b.x=dropX;b.z=dropZ;b.y=0;b.h=head;b.st='idle';b.t=rr(1,2);b.g.position.set(b.x,0,b.z);b.g.rotation.set(0,head,0);b.g.scale.setScalar(1);b.body.rotation.x=0;b.sp.visible=true;b.sh.visible=true;syncTakeButton();msg('🕊️ '+b.name+' yere bırakıldı');return}
 if(watchedBird){msg('Önce kuş izleme modundan çık.');return}
 let nb=null,nd=3.8;for(const b of birds.concat(extra)){if(b.st=='fly'||b.st=='out'||b.st=='home'||b.st=='held')continue;const d=Math.hypot(b.x-P.x,b.z-P.z);if(d<nd){nd=d;nb=b}}
 if(!nb){msg('Kuşu eline almak için yakınına git');return}
@@ -482,7 +565,7 @@ const fdB=document.getElementById('fd'),tkB=document.getElementById('tk'),upB=do
 syncTakeButton();
 fdB.addEventListener('pointerdown',e=>{actFeed();e.preventDefault()});tkB.addEventListener('pointerdown',e=>{actTake();e.preventDefault()});
 upB.addEventListener('click',upgradeCoop);
-addEventListener('keydown',e=>{if(e.repeat)return;const k=e.key.toLowerCase();if(k=='f')actFeed();if(k=='h'||k=='g')actTake();if(k=='u')upgradeCoop()});
+addEventListener('keydown',e=>{if(e.repeat||shopPanel.classList.contains('visible'))return;const k=e.key.toLowerCase();if(k=='f')actFeed();if(k=='h'||k=='g')actTake();if(k=='u')upgradeCoop()});
 function actFly(){AC&&AC.resume();let n=0;for(const b of birds.filter(b=>b.own).concat(extra)){if(b.chick||b.st=='out'||b.st=='home')continue;b.st='out';b.t=rr(25,40);b.h=rr(0,6.28);b.ty=rr(8,14);b.sv=rr(0,6);n++}msg(n?'🕊️ Kuşlar uzaklara uçtu; uzun süre sonra yuvalarına dönecek!':'Uçacak kuş yok (yavrular uçamaz)');if(n)beep(300,.04)}
 let watchedBird=null;
 const watchBtn=document.getElementById('watch');
@@ -504,34 +587,52 @@ function makeRemoteBird(peer,id,data){const br=BR.find(x=>x.n===data.breed)||BR[
 const c=document.createElement('canvas');c.width=400;c.height=120;b.lg=c.getContext('2d');b.lt=new T.CanvasTexture(c);
 b.sp=new T.Sprite(new T.SpriteMaterial({map:b.lt,transparent:true,depthTest:false}));b.sp.scale.set(3.6,1.08,1);b.sp.position.y=1.9;b.sp.renderOrder=9;b.g.add(b.sp);b.sh=mesh(new T.CircleGeometry(.5,12),0x000000);b.sh.rotation.x=-Math.PI/2;b.sh.material.transparent=true;b.sh.material.opacity=.28;scene.add(b.sh);
 drawLab(b);scene.add(b.g);useModel(b);remoteBirds.push(b);peer.birds.set(id,b);return b}
+let onlineCoopSlot=0;
+const REMOTE_COOP_SLOTS=8;
+function remoteCoopPosition(slot){const relative=(slot-onlineCoopSlot+REMOTE_COOP_SLOTS)%REMOTE_COOP_SLOTS,angle=(relative/REMOTE_COOP_SLOTS)*Math.PI*2-Math.PI/2;
+return{x:coopCenter.x+Math.cos(angle)*28,z:coopCenter.z+Math.sin(angle)*28}}
+function updateRemoteCoop(peer,level){const pos=remoteCoopPosition(peer.coopSlot),safeLevel=Math.max(0,Math.min(COOP_MAX_LEVEL,Math.floor(Number(level)||0))),sx=(4+safeLevel)/4,sz=(5+safeLevel)/5;
+peer.coop.scale.set(sx,1,sz);peer.coop.position.set(pos.x-coopCenter.x*sx,0,pos.z-coopCenter.z*sz);peer.coop.visible=true;
+peer.coopTag.position.set(pos.x,8,pos.z);peer.coopTag.visible=true}
 function makeRemotePlayer(player){const avatar=pl.clone(true);avatar.visible=false;scene.add(avatar);
 const tag=spr(ctx=>{ctx.fillStyle='#000b';ctx.fillRect(0,0,320,80);ctx.fillStyle='#fff';ctx.font='bold 34px system-ui';ctx.textAlign='center';ctx.fillText(String(player.name||'Oyuncu').slice(0,16),160,53)},320,80,2.8,.7);tag.visible=false;scene.add(tag);
-return{id:player.id,name:player.name||'Oyuncu',avatar,tag,birds:new Map(),state:null}}
+const coop=coopModel.clone(true);coop.visible=false;scene.add(coop);
+const coopTag=spr(ctx=>{ctx.fillStyle='#000b';ctx.fillRect(0,0,320,80);ctx.fillStyle='#fff';ctx.font='bold 30px system-ui';ctx.textAlign='center';ctx.fillText('Kümes · '+String(player.name||'Oyuncu').slice(0,12),160,53)},320,80,2.8,.7);coopTag.visible=false;scene.add(coopTag);
+return{id:player.id,name:player.name||'Oyuncu',coopSlot:Number.isInteger(player.coopSlot)?player.coopSlot:0,avatar,tag,coop,coopTag,birds:new Map(),state:null}}
 function removeRemoteBird(peer,id){const b=peer.birds.get(id);if(!b)return;scene.remove(b.g);scene.remove(b.sh);const i=remoteBirds.indexOf(b);if(i>=0)remoteBirds.splice(i,1);peer.birds.delete(id)}
-function removeRemotePlayer(id){const peer=onlinePeers.get(id);if(!peer)return;scene.remove(peer.avatar);scene.remove(peer.tag);for(const birdId of peer.birds.keys())removeRemoteBird(peer,birdId);onlinePeers.delete(id)}
+function removeRemotePlayer(id){const peer=onlinePeers.get(id);if(!peer)return;scene.remove(peer.avatar);scene.remove(peer.tag);scene.remove(peer.coop);scene.remove(peer.coopTag);for(const birdId of peer.birds.keys())removeRemoteBird(peer,birdId);onlinePeers.delete(id)}
 function updateRemotePlayer(player){if(!player||player.id===online.id)return;let peer=onlinePeers.get(player.id);if(!peer){peer=makeRemotePlayer(player);onlinePeers.set(player.id,peer)}
-peer.name=String(player.name||'Oyuncu').slice(0,16);if(!player.state)return;const state=player.state;
+peer.name=String(player.name||'Oyuncu').slice(0,16);peer.coopSlot=Number.isInteger(player.coopSlot)?player.coopSlot:peer.coopSlot;updateRemoteCoop(peer,player.state&&player.state.coopLevel);if(!player.state)return;const state=player.state;
 peer.state=state;peer.avatar.visible=true;peer.avatar.position.set(state.x,0,state.z);peer.avatar.rotation.y=state.h;peer.tag.position.set(state.x,2.5,state.z);peer.tag.visible=true;
 const seen=new Set();for(const data of state.birds||[]){const id=String(data.id),b=peer.birds.get(id)||makeRemoteBird(peer,id,data);seen.add(id);
 b.x=data.x;b.z=data.z;b.y=data.y;b.h=data.h;b.st=data.st;b.g.position.set(b.x,b.y,b.z);b.g.rotation.y=b.h;b.sh.position.set(b.x,.04,b.z);b.sh.scale.setScalar(Math.max(.3,1-b.y*.15));b.sp.visible=Math.hypot(b.x-P.x,b.z-P.z)<55}
 for(const id of peer.birds.keys())if(!seen.has(id))removeRemoteBird(peer,id)}
 function handleOnlineMessage(data){if(data.type==='error'){online.errorMessage=data.message||'Online bağlantı hatası.';setOnlineStatus(online.errorMessage);return}
-if(data.type==='welcome'){online.id=data.id;online.room=data.room;online.joined=true;onlineCopy.disabled=false;if(online.sendTimer)clearInterval(online.sendTimer);online.sendTimer=setInterval(sendOnlineState,100);const peers=Array.isArray(data.players)?data.players:[];
+if(data.type==='welcome'){if(onlineConnectTimer){clearTimeout(onlineConnectTimer);onlineConnectTimer=null}onlineReconnectAttempts=0;online.id=data.id;online.room=data.room;onlineCoopSlot=Number.isInteger(data.coopSlot)?data.coopSlot:0;setLocalCoopSlot(onlineCoopSlot);online.joined=true;onlineCopy.disabled=false;if(online.sendTimer)clearInterval(online.sendTimer);online.sendTimer=setInterval(sendOnlineState,100);const peers=Array.isArray(data.players)?data.players:[];
 for(const p of peers)updateRemotePlayer(p);const occupied=peers.filter(p=>p.state).map(p=>p.state),offsets=[[0,0],[3,0],[-3,0],[0,3],[0,-3],[3,3],[-3,3],[3,-3],[-3,-3]];
 for(const [dx,dz] of offsets){const x=Math.max(-62,Math.min(62,P.x+dx)),z=Math.max(-62,Math.min(62,P.z+dz));if(!occupied.some(p=>Math.hypot(x-p.x,z-p.z)<2.5)&&!obs.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.4)){P.x=x;P.z=z;break}}
 onlineBtn.textContent='🌐 '+online.room;setOnlineStatus('Bağlandı · oda '+online.room+' · '+(peers.length+1)+' oyuncu');return}
 if(data.type==='peer-join'){updateRemotePlayer(data.player);setOnlineStatus('Bir oyuncu odaya katıldı · '+online.room);return}
 if(data.type==='peer-state'){updateRemotePlayer(data.player);return}
 if(data.type==='peer-leave'){removeRemotePlayer(data.id);setOnlineStatus('Bir oyuncu odadan ayrıldı · '+online.room)}}
-function connectOnline(room,name){if(location.protocol==='file:'||!location.host){setOnlineStatus('Önce `npm start` ile sunucuyu başlatıp oyunu http://localhost:3000 üzerinden aç.');return}
-if(online.socket)return;online.room=room;online.errorMessage='';setOnlineStatus('Odaya bağlanılıyor…');
+let onlineReconnectName='Misafir',onlineReconnectAttempts=0,onlineReconnectTimer=null,onlineConnectTimer=null,onlineReconnectEnabled=false;
+function queueOnlineReconnect(){if(!onlineReconnectEnabled||!online.room||onlineReconnectTimer)return;
+const delay=Math.min(14000,1000*Math.pow(2,Math.min(onlineReconnectAttempts,4)))+Math.random()*1000;onlineReconnectAttempts=Math.min(onlineReconnectAttempts+1,4);
+setOnlineStatus('Bağlantı koptu · '+Math.ceil(delay/1000)+' sn sonra yeniden bağlanılıyor…');
+onlineReconnectTimer=setTimeout(()=>{onlineReconnectTimer=null;if(onlineReconnectEnabled&&!online.socket)connectOnline(online.room,onlineReconnectName,true)},delay)}
+function connectOnline(room,name,retrying=false){if(location.protocol==='file:'||!location.host){setOnlineStatus('Önce `npm start` ile sunucuyu başlatıp oyunu http://localhost:3000 üzerinden aç.');return}
+if(online.socket)return;if(!retrying){online.room=room;onlineReconnectName=cleanName(name);onlineReconnectAttempts=0;onlineReconnectEnabled=true}else{room=online.room;name=onlineReconnectName}
+online.errorMessage='';online.joined=false;setOnlineStatus('Odaya bağlanılıyor…');
 const url=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'/ws';let socket;
-try{socket=new WebSocket(url)}catch(error){console.error('Online bağlantısı başlatılamadı:',error);setOnlineStatus('Online bağlantısı başlatılamadı. Sunucuyu kontrol et.');return}
-online.socket=socket;
-socket.addEventListener('open',()=>socket.send(JSON.stringify({type:'join',room,name:cleanName(name)})));
+try{socket=new WebSocket(url)}catch(error){console.error('Online bağlantısı başlatılamadı:',error);setOnlineStatus('Bağlantı kurulamadı; yeniden denenecek.');if(onlineReconnectEnabled)queueOnlineReconnect();return}
+online.socket=socket;onlineConnectTimer=setTimeout(()=>{if(online.socket===socket&&!online.joined)socket.close()},12000);
+socket.addEventListener('open',()=>{if(online.socket===socket)socket.send(JSON.stringify({type:'join',room,name:cleanName(name)}))});
 socket.addEventListener('message',event=>{let data;try{data=JSON.parse(event.data)}catch(error){console.error('Sunucudan geçersiz online mesajı alındı:',error);return}handleOnlineMessage(data)});
-socket.addEventListener('error',()=>{online.errorMessage='Sunucuya bağlanılamadı. Sunucunun çalıştığını kontrol et.';setOnlineStatus(online.errorMessage)});
-socket.addEventListener('close',()=>{if(online.socket!==socket)return;if(online.sendTimer)clearInterval(online.sendTimer);online.sendTimer=null;online.socket=null;online.id=null;online.joined=false;onlineCopy.disabled=true;for(const id of onlinePeers.keys())removeRemotePlayer(id);setOnlineStatus(online.errorMessage||'Bağlantı kesildi. Aynı oda koduyla tekrar bağlanabilirsin.')})}
+socket.addEventListener('error',()=>{online.errorMessage='Sunucuya bağlanılamadı. Bağlantı yeniden denenecek.';setOnlineStatus(online.errorMessage)});
+socket.addEventListener('close',event=>{if(online.socket!==socket)return;if(onlineConnectTimer){clearTimeout(onlineConnectTimer);onlineConnectTimer=null}if(online.sendTimer)clearInterval(online.sendTimer);online.sendTimer=null;online.socket=null;online.id=null;onlineCoopSlot=0;online.joined=false;onlineCopy.disabled=true;for(const id of onlinePeers.keys())removeRemotePlayer(id);
+const permanent=event.code===1003||(event.code===1008&&!online.errorMessage.includes('Oda dolu'));if(permanent){onlineReconnectEnabled=false;setOnlineStatus(online.errorMessage||'Odaya katılma isteği reddedildi.');return}
+if(onlineReconnectEnabled)queueOnlineReconnect();else setOnlineStatus(online.errorMessage||'Bağlantı kesildi. Aynı oda koduyla tekrar bağlanabilirsin.')})}
+window.addEventListener('pagehide',()=>{onlineReconnectEnabled=false;if(onlineReconnectTimer){clearTimeout(onlineReconnectTimer);onlineReconnectTimer=null}});
 function enterOnlineRoom(code){if(location.protocol==='file:'||!location.host){setOnlineStatus('Online için önce `npm start` ile sunucuyu başlat; sonra http://localhost:3000 adresini aç.');return}
 if(!/^[A-Z0-9]{4,8}$/.test(code)){setOnlineStatus('Oda kodu 4–8 harf/rakam olmalı.');return}
 const url=new URL(location.href);url.searchParams.set('room',code);url.searchParams.set('name',cleanName(onlineName.value));location.href=url.toString()}
@@ -544,12 +645,12 @@ else setOnlineStatus('Bağlantı aşağıda seçili; elle kopyalayabilirsin.')})
 onlineLink.addEventListener('focus',()=>onlineLink.select());
 if(roomParam){onlineCode.value=roomParam;const requestedName=new URLSearchParams(location.search).get('name');if(requestedName)onlineName.value=cleanName(requestedName);connectOnline(roomParam,onlineName.value)}
 function sendOnlineState(){if(!online.joined||!online.socket||online.socket.readyState!==WebSocket.OPEN)return;
-const state={x:P.x,z:P.z,h:head,birds:birds.concat(extra).filter(b=>b.own&&b.st!='held').slice(0,26).map(b=>({id:b.netId||(b.netId='bird-'+(++localBirdId)),name:b.name,breed:b.br.n,male:b.male,x:b.x,z:b.z,y:b.y,h:b.h,st:b.st}))};
+const state={x:P.x,z:P.z,h:head,coopLevel,birds:birds.concat(extra).filter(b=>b.own&&b.st!='held').slice(0,26).map(b=>({id:b.netId||(b.netId='bird-'+(++localBirdId)),name:b.name,breed:b.br.n,male:b.male,x:b.x,z:b.z,y:b.y,h:b.h,st:b.st}))};
 online.socket.send(JSON.stringify({type:'state',state}))}
 const clock=new T.Clock();let help=14;
 function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05);saveElapsed+=dt;if(saveElapsed>=2){saveElapsed=0;saveGame()}
 if(K.arrowleft)head+=2.3*dt;if(K.arrowright)head-=2.3*dt;if(K.arrowup)pitch=Math.min(1.1,pitch+1.5*dt);if(K.arrowdown)pitch=Math.max(-1.1,pitch-1.5*dt);
-const mv=watchedBird?0:Math.max(-1,Math.min(1,(K.w?1:0)-(K.s?.6:0)+jy)),sv=watchedBird?0:Math.max(-1,Math.min(1,(K.d?1:0)-(K.a?1:0)+jx)),run=(K.shift||runT)?1.8:1;
+const shopOpen=shopPanel.classList.contains('visible'),mv=watchedBird||shopOpen?0:Math.max(-1,Math.min(1,(K.w?1:0)-(K.s?.6:0)+jy)),sv=watchedBird||shopOpen?0:Math.max(-1,Math.min(1,(K.d?1:0)-(K.a?1:0)+jx)),run=(K.shift||runT)?1.8:1;
 psp+=(mv*4.5*run-psp)*Math.min(1,9*dt);ssp+=(sv*4*run-ssp)*Math.min(1,9*dt);
 let nx=P.x+Math.sin(head)*psp*dt-Math.cos(head)*ssp*dt,nz=P.z+Math.cos(head)*psp*dt+Math.sin(head)*ssp*dt;
 for(const o of obs){const d=Math.hypot(nx-o.x,nz-o.z),m=o.r+.4;if(d<m){nx=o.x+(nx-o.x)/d*m;nz=o.z+(nz-o.z)/d*m}}
@@ -557,9 +658,9 @@ P.x=Math.max(-64,Math.min(64,nx));P.z=Math.max(-64,Math.min(64,nz));if(heldBird)
 pw+=dt*Math.hypot(psp,ssp)*2;const sw=Math.sin(pw)*.8*Math.min(1,Math.abs(psp)/3);
 legL.rotation.x=sw;legR.rotation.x=-sw;armL.rotation.x=-sw*.8;armR.rotation.x=sw*.8;
 cd-=dt;let ta=0;if(thr>0){thr-=dt;ta=Math.sin(Math.min(1,(.35-thr)/.35)*Math.PI)}hand.rotation.x=.25-ta*1.1;hand.position.set(.34,-.3+ta*.1,-.55-ta*.25);
-if(!watchedBird&&!heldBird&&(K.e||K[' ']))throwSeed();
+if(!watchedBird&&!heldBird&&!shopOpen&&(K.e||K[' ']))throwSeed();
 pl.position.set(P.x,0,P.z);pl.rotation.y=head;
-if(Math.hypot(P.x-SX,P.z-SZ)<5){if(seeds<40){seeds=Math.min(40,seeds+25*dt);hud();document.getElementById('tip').textContent='🌾 Yem dolduruluyor…'}else document.getElementById('tip').textContent='🌾 Torban dolu'}
+if(Math.hypot(P.x-SX,P.z-SZ)<5){if(seeds<seedCapacity()){seeds=Math.min(seedCapacity(),seeds+25*dt);hud();document.getElementById('tip').textContent='🌾 Yem dolduruluyor… · M: Market'}else document.getElementById('tip').textContent='🌾 Torban dolu · M: Market'}
 else if(seeds<=0)document.getElementById('tip').textContent='Yemin bitti! Tezgâha git 🌾';else document.getElementById('tip').textContent='';
 for(const s of seedsA){if(s.life<=0){if(s.m.parent)scene.remove(s.m);continue}s.life-=dt;if(!s.land){s.vy-=12*dt;s.x+=s.vx*dt;s.z+=s.vz*dt;s.y+=s.vy*dt;if(s.y<=.08){s.y=.08;s.land=1}}
 s.m.position.set(s.x,s.y,s.z);if(s.life<=0)scene.remove(s.m)}
